@@ -40,6 +40,9 @@ set(cpu_PARAMS
     # -mcpu, -mfloat, -mfloat-abi, ...
 )
 
+# Target board selection
+set(BOARD "nucleo_f103rb" CACHE STRING "Target board: nucleo_f103rb, bluepill_f103c8_64, bluepill_f103c8_128")
+
 # Sources
 set(sources_SRCS
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/main.c
@@ -81,6 +84,20 @@ set(linker_OPTS)
 # information to the project
 include("cmake/vscode_generated.cmake")
 
+# Override linker script and board macros by board selection
+if(BOARD STREQUAL "nucleo_f103rb")
+    set(linker_script_SRC ${CMAKE_CURRENT_SOURCE_DIR}/stm32f103xb_flash.ld)
+    set(board_DEFS BOARD_NUCLEO_F103RB)
+elseif(BOARD STREQUAL "bluepill_f103c8_64")
+    set(linker_script_SRC ${CMAKE_CURRENT_SOURCE_DIR}/stm32f103x8_flash.ld)
+    set(board_DEFS BOARD_BLUEPILL)
+elseif(BOARD STREQUAL "bluepill_f103c8_128")
+    set(linker_script_SRC ${CMAKE_CURRENT_SOURCE_DIR}/stm32f103xb_flash.ld)
+    set(board_DEFS BOARD_BLUEPILL)
+else()
+    message(FATAL_ERROR "Unknown BOARD: ${BOARD}")
+endif()
+
 # Link directories setup
 # Must be before executable is added
 link_directories(${CMAKE_PROJECT_NAME} ${link_DIRS})
@@ -105,6 +122,7 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     $<$<COMPILE_LANGUAGE:C>: ${symbols_c_SYMB}>
     $<$<COMPILE_LANGUAGE:CXX>: ${symbols_cxx_SYMB}>
     $<$<COMPILE_LANGUAGE:ASM>: ${symbols_asm_SYMB}>
+    ${board_DEFS}
 
     # Configuration specific
     $<$<CONFIG:Debug>:DEBUG>

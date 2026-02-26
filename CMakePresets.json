@@ -48,6 +48,86 @@
                 "CMSIS_Dsecure": "",
                 "CMSIS_Tcompiler": "GCC"
             }
+        },
+        {
+            "name": "BluePill-64-Debug",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+
+                "CMSIS_Dvendor": "STMicroelectronics:13",
+                "CMSIS_Dname": "STM32F103C8T6",
+                "CMSIS_Dcore": "Cortex-M3",
+                "CMSIS_Dtz": "NO_TZ",
+                "CMSIS_Dfpu": "NO_FPU",
+                "CMSIS_Ddsp": "NO_DSP",
+                "CMSIS_Dmve": "NO_MVE",
+                "CMSIS_Dmpu": "MPU",
+                "CMSIS_Dendian": "Little-endian",
+                "CMSIS_Dsecure": "",
+                "CMSIS_Tcompiler": "GCC",
+                "BOARD": "bluepill_f103c8_64"
+            }
+        },
+        {
+            "name": "BluePill-64-Release",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+
+                "CMSIS_Dvendor": "STMicroelectronics:13",
+                "CMSIS_Dname": "STM32F103C8T6",
+                "CMSIS_Dcore": "Cortex-M3",
+                "CMSIS_Dtz": "NO_TZ",
+                "CMSIS_Dfpu": "NO_FPU",
+                "CMSIS_Ddsp": "NO_DSP",
+                "CMSIS_Dmve": "NO_MVE",
+                "CMSIS_Dmpu": "MPU",
+                "CMSIS_Dendian": "Little-endian",
+                "CMSIS_Dsecure": "",
+                "CMSIS_Tcompiler": "GCC",
+                "BOARD": "bluepill_f103c8_64"
+            }
+        },
+        {
+            "name": "BluePill-128-Debug",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+
+                "CMSIS_Dvendor": "STMicroelectronics:13",
+                "CMSIS_Dname": "STM32F103C8T6",
+                "CMSIS_Dcore": "Cortex-M3",
+                "CMSIS_Dtz": "NO_TZ",
+                "CMSIS_Dfpu": "NO_FPU",
+                "CMSIS_Ddsp": "NO_DSP",
+                "CMSIS_Dmve": "NO_MVE",
+                "CMSIS_Dmpu": "MPU",
+                "CMSIS_Dendian": "Little-endian",
+                "CMSIS_Dsecure": "",
+                "CMSIS_Tcompiler": "GCC",
+                "BOARD": "bluepill_f103c8_128"
+            }
+        },
+        {
+            "name": "BluePill-128-Release",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+
+                "CMSIS_Dvendor": "STMicroelectronics:13",
+                "CMSIS_Dname": "STM32F103C8T6",
+                "CMSIS_Dcore": "Cortex-M3",
+                "CMSIS_Dtz": "NO_TZ",
+                "CMSIS_Dfpu": "NO_FPU",
+                "CMSIS_Ddsp": "NO_DSP",
+                "CMSIS_Dmve": "NO_MVE",
+                "CMSIS_Dmpu": "MPU",
+                "CMSIS_Dendian": "Little-endian",
+                "CMSIS_Dsecure": "",
+                "CMSIS_Tcompiler": "GCC",
+                "BOARD": "bluepill_f103c8_128"
+            }
         }
     ],
     "buildPresets": [
@@ -63,6 +143,22 @@
         {
             "name": "Release",
             "configurePreset": "Release"
+        },
+        {
+            "name": "BluePill-64-Debug",
+            "configurePreset": "BluePill-64-Debug"
+        },
+        {
+            "name": "BluePill-64-Release",
+            "configurePreset": "BluePill-64-Release"
+        },
+        {
+            "name": "BluePill-128-Debug",
+            "configurePreset": "BluePill-128-Debug"
+        },
+        {
+            "name": "BluePill-128-Release",
+            "configurePreset": "BluePill-128-Release"
         }
     ]
 }

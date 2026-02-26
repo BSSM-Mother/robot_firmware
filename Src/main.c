@@ -25,6 +25,7 @@
 #define RCC_BASE           0x40021000
 #define GPIOA_BASE         0x40010800
 #define GPIOB_BASE         0x40010C00
+#define USART1_BASE        0x40013800
 #define USART2_BASE        0x40004400
 #define TIM1_BASE          0x40012C00
 #define TIM3_BASE          0x40000400
@@ -88,7 +89,14 @@ typedef struct {
 #define RCC   ((RCC_TypeDef *)RCC_BASE)
 #define GPIOA ((GPIO_TypeDef *)GPIOA_BASE)
 #define GPIOB ((GPIO_TypeDef *)GPIOB_BASE)
+#define USART1 ((USART_TypeDef *)USART1_BASE)
 #define USART2 ((USART_TypeDef *)USART2_BASE)
+// 보드별 UART 선택
+#if defined(BOARD_BLUEPILL)
+#define USARTx USART1
+#else
+#define USARTx USART2
+#endif
 #define TIM1  ((TIM_TypeDef *)TIM1_BASE)
 #define TIM3  ((TIM_TypeDef *)TIM3_BASE)
 
@@ -116,23 +124,32 @@ void uart_init(void)
 {
     // GPIOA 클럭 활성화
     RCC->APB2ENR |= (1 << 2);  // IOPAEN
-    
-    // USART2 클럭 활성화
+
+#if defined(BOARD_BLUEPILL)
+    // USART1 클럭 활성화 (APB2)
+    RCC->APB2ENR |= (1 << 14); // USART1EN
+
+    // PA9(TX): AF_PP, PA10(RX): In_Floating
+    GPIOA->CRH &= ~(0xFF << 4); // PA9, PA10 클리어 (bits 4-11)
+    GPIOA->CRH |= (0x0B << 4) | (0x04 << 8);  // PA9=1011(AF_PP,50MHz), PA10=0100(In_Floating)
+#else
+    // USART2 클럭 활성화 (APB1)
     RCC->APB1ENR |= (1 << 17); // USART2EN
-    
+
     // PA2(TX): AF_PP, PA3(RX): In_Floating
     GPIOA->CRL &= ~(0xFF << 8); // PA2, PA3 클리어 (bits 8-15)
     GPIOA->CRL |= (0x0B << 8) | (0x04 << 12);  // PA2=1011(AF_PP,50MHz), PA3=0100(In_Floating)
-    
-    // USART2 설정: 115200 baud
-    // APB1 = 8MHz (HSI, 분주 없음)
+#endif
+
+    // USART 설정: 115200 baud
+    // APB = 8MHz (HSI, 분주 없음)
     // USARTDIV = 8000000 / (16 * 115200) = 4.34
     // Mantissa = 4, Fraction = 0.34 * 16 = 5.44 ≈ 5
     // BRR = (4 << 4) | 5 = 0x45
-    USART2->BRR = 0x45;
-    USART2->CR1 = (1 << 3) | (1 << 2) | (1 << 13); // TE, RE, UE (인터럽트 없음)
-    USART2->CR2 = 0;
-    USART2->CR3 = 0;
+    USARTx->BRR = 0x45;
+    USARTx->CR1 = (1 << 3) | (1 << 2) | (1 << 13); // TE, RE, UE (인터럽트 없음)
+    USARTx->CR2 = 0;
+    USARTx->CR3 = 0;
 }
 
 // GPIO 초기화 (모터 제어 핀)
@@ -180,8 +197,8 @@ void timer_init(void)
 // 문자 하나 전송
 void uart_putchar(char c)
 {
-    while (!(USART2->SR & (1 << 7))); // TXE 대기
-    USART2->DR = c;
+    while (!(USARTx->SR & (1 << 7))); // TXE 대기
+    USARTx->DR = c;
 }
 
 // 문자열 전송
@@ -195,9 +212,9 @@ void uart_puts(const char *str)
 void uart_rx_handler(void)
 {
     // 모든 수신 데이터를 빠르게 처리
-    while (USART2->SR & (1 << 5)) // RXNE
+    while (USARTx->SR & (1 << 5)) // RXNE
     {
-        char c = USART2->DR;
+        char c = USARTx->DR;
         
         // 에코 (디버깅)
         uart_putchar(c);

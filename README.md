@@ -5,19 +5,27 @@ UART를 통해 라즈베리파이로부터 명령을 받아 L298N 모터 드라�
 ## 하드웨어 정보
 
 ### MCU
-- **보드**: NUCLEO-F103RB
-- **칩**: STM32F103RB (ARM Cortex-M3)
-- **Flash**: 128 KB
+- **보드**: NUCLEO-F103RB, Blue Pill (STM32F103C8T6)
+- **칩**: STM32F103RB / STM32F103C8T6 (ARM Cortex-M3)
+- **Flash**: 128 KB (RB) / 64 KB 또는 128 KB (C8T6 클론)
 - **RAM**: 20 KB
 - **클럭**: HSI 8MHz (PLL 미사용)
 
 ### 통신 인터페이스
 
-#### UART2 (ST-LINK를 통해 라즈베리파이와 연결)
+#### NUCLEO-F103RB: UART2 (ST-LINK를 통해 라즈베리파이와 연결)
 | 핀 | GPIO | 기능 | 참고 |
 |----|------|------|------|
 | TX | PA2 | 송신 | ST-LINK로 출력 |
 | RX | PA3 | 수신 | ST-LINK로 입력 |
+| **보레이트** | | **115200 baud** | |
+| **Format** | | 8N1 (8bit, No parity, 1 stop) | |
+
+#### Blue Pill: UART1
+| 핀 | GPIO | 기능 | 참고 |
+|----|------|------|------|
+| TX | PA9 | 송신 | USB-TTL 연결 권장 |
+| RX | PA10 | 수신 | USB-TTL 연결 권장 |
 | **보레이트** | | **115200 baud** | |
 | **Format** | | 8N1 (8bit, No parity, 1 stop) | |
 
@@ -80,10 +88,16 @@ OK:L=FWD,R=FWD\r\n
 
 ### UART 핀 매핑
 ```
-라즈베리파이          STM32F103RB
+라즈베리파이          NUCLEO-F103RB
 ─────────────────────────────────
-TX (GPIO 14)  ──→  PA10 (USART1_RX)  [현재: PA3, USART2_RX]
-RX (GPIO 15)  ←──  PA9 (USART1_TX)   [현재: PA2, USART2_TX]
+TX (GPIO 14)  ──→  PA3 (USART2_RX)
+RX (GPIO 15)  ←──  PA2 (USART2_TX)
+GND           ────  GND
+
+라즈베리파이          Blue Pill
+─────────────────────────────────
+TX (GPIO 14)  ──→  PA10 (USART1_RX)
+RX (GPIO 15)  ←──  PA9 (USART1_TX)
 GND           ────  GND
 ```
 
@@ -125,8 +139,20 @@ echo "0,0,0" > /dev/ttyUSB0
 
 ### 빌드
 ```bash
-cd build/Release
-cmake --build .
+cmake --preset Debug
+cmake --build --preset Debug
+```
+
+Blue Pill 64KB:
+```bash
+cmake --preset BluePill-64-Debug
+cmake --build --preset BluePill-64-Debug
+```
+
+Blue Pill 128KB:
+```bash
+cmake --preset BluePill-128-Debug
+cmake --build --preset BluePill-128-Debug
 ```
 
 ### 업로드 (VS Code)
@@ -142,7 +168,7 @@ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg \
 ## 시스템 초기화 순서
 
 1. **시스템 클럭**: HSI 8MHz 초기화
-2. **UART2**: 115200 baud로 초기화 (PA2=TX, PA3=RX)
+2. **UART**: 115200 baud로 초기화 (NUCLEO=USART2 PA2/PA3, Blue Pill=USART1 PA9/PA10)
 3. **GPIO**: PB0-3 출력, PA7, PA8 PWM 출력 설정
 4. **Timer**: TIM1, TIM3 PWM 타이머 설정 (1MHz, 256 주기)
 5. **시작 메시지**: `"Motor Control System Started\r\n"` 전송
@@ -173,7 +199,7 @@ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg \
 | 함수 | 설명 |
 |------|------|
 | `system_clock_init()` | 시스템 클럭 초기화 (HSI 8MHz) |
-| `uart_init()` | UART2 초기화 (115200 baud) |
+| `uart_init()` | UART 초기화 (보드별 USART1/USART2) |
 | `gpio_init()` | GPIO 핀 초기화 |
 | `timer_init()` | PWM 타이머 초기화 |
 | `uart_rx_handler()` | UART 수신 처리 |
